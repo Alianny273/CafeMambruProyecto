@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Gerencial - Café Mambrú</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FDFBF7;
+            color: #2C221E;
+            margin: 0;
+            padding: 40px;
+        }
+        h1 {
+            color: #2C5545;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #78716C;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #EAE0D5;
+        }
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.85rem;
+            color: #78716C;
+            text-transform: uppercase;
+        }
+        .card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2C5545;
+        }
+        .card .value.accent {
+            color: #E2725B;
+        }
+        h2 {
+            color: #2C5545;
+            border-bottom: 2px solid #EAE0D5;
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+        /* Estilos para la tabla generada por Pandas */
+        table.table-style {
+            width: 100%;
+            border-collapse: collapse;
+            background: #FFFFFF;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #EAE0D5;
+        }
+        table.table-style th {
+            background-color: #2C5545;
+            color: #FFFFFF;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        table.table-style td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #EAE0D5;
+            font-size: 0.9rem;
+        }
+        table.table-style tr:hover {
+            background-color: #FDFBF7;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Café Mambrú - Reporte del Sistema</h1>
+    <p class="subtitle">Generado automáticamente mediante Python, Pandas y conexión a Base de Datos MySQL.</p>
+
+    <!-- Tarjetas de KPIs (Indicadores clave) -->
+    <div class="kpi-grid">
+        <div class="card">
+            <h3>Ventas Totales Registradas</h3>
+            <div class="value">$140,000.00 COP</div>
+        </div>
+        <div class="card">
+            <h3>Total de Pedidos</h3>
+            <div class="value accent">2</div>
+        </div>
+        <div class="card">
+            <h3>Stock Total en Tienda</h3>
+            <div class="value">147 u.</div>
+        </div>
+        <div class="card">
+            <h3>Producto Destacado</h3>
+            <div class="value" style="font-size: 1.2rem; margin-top: 5px;">cafe cafe</div>
+        </div>
+    </div>
+
+    <h2>Inventario Actual de Productos</h2>
+    <table border="1" class="dataframe table-style">
+  <thead>
+    <tr style="text-align: right;">
+      <th>nombre</th>
+      <th>categoria</th>
+      <th>precio</th>
+      <th>stock</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Café de Especialidad - Sofoco</td>
+      <td>Café</td>
+      <td>35000.0</td>
+      <td>47</td>
+    </tr>
+    <tr>
+      <td>Café de Especialidad - Bruma</td>
+      <td>Café</td>
+      <td>35000.0</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>Prensa Francesa Mambru</td>
+      <td>Accesorio</td>
+      <td>45000.0</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <td>Cafe Chocoavellana</td>
+      <td>Café Saborizado</td>
+      <td>10000.0</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <td>cafe cafe</td>
+      <td>Café</td>
+      <td>100000.0</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

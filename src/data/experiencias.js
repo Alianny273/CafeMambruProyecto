@@ -1,0 +1,55 @@
+// Cada experiencia tiene su texto completo (página Experiencias)
+// y un "resumen" más corto que se usa en la vista previa del inicio.
+export const experiencias = [
+  {
+    id: 1,
+    imagen: '/img/ninos.jpg',
+    alt: 'Actividades sensoriales y talleres para niños con café y chocolate',
+    badge: 'Familiar',
+    badgeClase: 'badge-orange',
+    titulo: 'Talleres para Niños',
+    subtitulo: '🎈 Creatividad y Diversión',
+    descripcion: 'Experiencias pensadas para niños con actividades sensoriales y un acercamiento divertido al café y al chocolate.',
+    etiqueta: 'Creativo',
+    resumen: {
+      titulo: 'Talleres Infantiles',
+      subtitulo: '🎈 Niños y Chocolate',
+      descripcion: 'Actividades sensoriales creativas y divertidas con café y chocolate.',
+      etiqueta: 'Experiencia',
+    },
+  },
+  {
+    id: 2,
+    imagen: '/img/talleres.jpg',
+    alt: 'Talleres para aprender de café',
+    badge: 'Educativo',
+    badgeClase: 'badge-blue',
+    titulo: 'Talleres de Café',
+    subtitulo: '📚 Espacios de Aprendizaje',
+    descripcion: 'Conoce el mundo del café, sus procesos, características, preparación y la cultura que hay detrás de cada grano.',
+    etiqueta: 'Educativo',
+    resumen: {
+      titulo: 'Talleres de Café',
+      subtitulo: '📚 Cultura y Procesos',
+      descripcion: 'Espacios educativos para dominar características, aromas y preparación.',
+      etiqueta: 'Aprendizaje',
+    },
+  },
+  {
+    id: 3,
+    imagen: '/img/catas.jpg',
+    alt: 'Catas de café',
+    badge: 'Sensorial',
+    badgeClase: 'badge-dark',
+    titulo: 'Catas de Café',
+    subtitulo: '✨ Descubrimiento Sensorial',
+    descripcion: 'Experiencias especiales para descubrir aromas, sabores y características únicas para personas interesadas en disfrutar más del café.',
+    etiqueta: 'Especial',
+    resumen: {
+      titulo: 'Catas de Café',
+      subtitulo: '✨ Degustación',
+      descripcion: 'Descubre y aprende a identificar matices, aromas y sabores únicos.',
+      etiqueta: 'Especial',
+    },
+  },
+]

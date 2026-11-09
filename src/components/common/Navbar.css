@@ -1,0 +1,130 @@
+/* Contenedor principal */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 70px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #114992;
+}
+
+/* Menú central */
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #114992;
+}
+
+/* Zona derecha */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Icono del carrito */
+.btn-cart-icon {
+  position: relative;
+  text-decoration: none;
+  color: #114992;
+  font-size: 1.25rem;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.btn-cart-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Opcional: pequeño círculo rojo para el contador (si lo usas) */
+.cart-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #ff4d4d;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
+
+/* Botón de Iniciar Sesión */
+.btn-login {
+  text-decoration: none;
+  background-color: #e4937d; 
+  color: #ffffff;
+  padding: 5px 14px; 
+  border-radius: 20px; 
+  font-size: 0.8rem; 
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 1.5px solid #222; 
+  box-shadow: 2px 2px 0px #222; 
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+} 
+
+.btn-login:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #222;
+  background-color: #d2694e;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .navbar {
+    padding: 0 1rem;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 15px;
+    padding-top: 5px;
+    border-top: 1px solid #eee;
+  }
+}
