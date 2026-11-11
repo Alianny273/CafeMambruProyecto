@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { leerLista, guardarLista } from '../services/cuentaApi'
+import { leerLista, guardarLista } from '../services/cuentaService'
 
 // Lee una lista del cliente (direcciones, compras...). Devuelve { items, estado, guardar }
 export function useListaCuenta(recurso) {

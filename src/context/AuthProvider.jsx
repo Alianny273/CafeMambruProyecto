@@ -4,7 +4,7 @@ import { AuthContext } from './AuthContext'
 import {
   registrarCliente, ingresarCliente, salirCliente, restaurarSesion,
   guardarPerfil, eliminarCuenta, leerLista, guardarLista,
-} from '../services/cuentaApi'
+} from '../services/cuentaService'
 
 export default function AuthProvider({ children }) {
   const [cliente, setCliente] = useState(null)

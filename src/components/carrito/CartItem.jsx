@@ -1,4 +1,4 @@
-import { useCart } from '../../context/useCart'
+import { useCart } from '../../hooks/useCart'
 import { formatoPrecio } from '../../utils/formato'
 
 export default function CartItem({ item }) {

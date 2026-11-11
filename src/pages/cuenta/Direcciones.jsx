@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Campo from '../../components/ui/Campo'
 import Estado from '../../components/ui/Estado'
 import { useListaCuenta } from '../../hooks/useListaCuenta'
-import { useToast } from '../../context/useToast'
+import { useToast } from '../../hooks/useToast'
 
 const VACIA = { alias: '', direccion: '', ciudad: '', indicaciones: '' }
 

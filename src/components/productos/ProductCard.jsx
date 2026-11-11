@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { useCart } from '../../context/useCart'
-import { useAuth } from '../../context/useAuth'
-import { useToast } from '../../context/useToast'
+import { useCart } from '../../hooks/useCart'
+import { useAuth } from '../../hooks/useAuth'
+import { useToast } from '../../hooks/useToast'
 import { formatoPrecio } from '../../utils/formato'
 
 export default function ProductCard({ producto }) {

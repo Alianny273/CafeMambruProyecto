@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Estado from '../../components/ui/Estado'
 import ProductGrid from '../../components/productos/ProductGrid'
 import { useProductos } from '../../hooks/useProductos'
-import { useAuth } from '../../context/useAuth'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function Favoritos() {
   const { favoritos } = useAuth()

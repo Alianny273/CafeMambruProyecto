@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/useAuth';
+import { useAuth } from './hooks/useAuth';
 
 // 1. Layout y Páginas Públicas de la Tienda (Cliente Final)
 import Layout from './components/layout/Layout';

@@ -4,10 +4,10 @@ import SectionHeader from '../components/ui/SectionHeader'
 import Estado from '../components/ui/Estado'
 import CartItem from '../components/carrito/CartItem'
 import CartSummary from '../components/carrito/CartSummary'
-import { useCart } from '../context/useCart'
-import { useAuth } from '../context/useAuth'
+import { useCart } from '../hooks/useCart'
+import { useAuth } from '../hooks/useAuth'
 import { enviarPedido, MODO_DEMO } from '../services/api'
-import { registrarCompra } from '../services/cuentaApi'
+import { registrarCompra } from '../services/cuentaService'
 
 export default function Carrito() {
   const cart = useCart() || {}

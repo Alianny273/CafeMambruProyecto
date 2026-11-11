@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import Estado from '../../components/ui/Estado'
 import Avatar from '../../components/cuenta/Avatar'
 import ListaMenu from '../../components/cuenta/ListaMenu'
-import { useAuth } from '../../context/useAuth'
+import { useAuth } from '../../hooks/useAuth'
 
 // Marco de "Mi cuenta": título con el cliente, menú lateral y la sección elegida.
 // Si no hay sesión, manda a /ingresar y regresa aquí después.

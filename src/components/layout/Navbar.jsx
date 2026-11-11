@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { useCart } from '../../context/useCart'
+import { useCart } from '../../hooks/useCart'
 import CuentaMenu from './CuentaMenu'
 
 const enlaces = [

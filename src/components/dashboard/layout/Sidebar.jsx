@@ -11,7 +11,7 @@ import {
   Settings, 
   LogOut 
 } from 'lucide-react';
-import { useAuth } from "../../../context/useAuth"; 
+import { useAuth } from "../../../hooks/useAuth"; 
 
 export default function Sidebar() {
   const navigate = useNavigate();

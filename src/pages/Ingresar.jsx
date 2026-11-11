@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SectionHeader from '../components/ui/SectionHeader';
 import Campo from '../components/ui/Campo';
-import { useAuth } from '../context/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 const EMAIL = /^\S+@\S+\.\S+$/;
 

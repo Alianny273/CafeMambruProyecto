@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/useAuth'
+import { useAuth } from '../../hooks/useAuth'
 import ListaMenu from '../cuenta/ListaMenu'
 import Avatar from '../cuenta/Avatar'
 

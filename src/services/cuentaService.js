@@ -1,24 +1,18 @@
 import { MODO_DEMO, TOKEN_KEY, pedir } from './api'
 import * as demo from './cuentaStore'
 
-// ---------------------------------------------------------------
-// Cuenta de cliente. Modo demo: usa cuentaStore (localStorage).
-// Con backend (VITE_API_URL) o tu API de Spring Boot en localhost:8080
-// ---------------------------------------------------------------
 const guardarToken = (token) => {
   try { token ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY) } catch { /* sin storage */ }
 }
 const conJson = (metodo, datos) => ({ method: metodo, body: JSON.stringify(datos) })
 
-// El servidor devuelve cada compra como { idPedido, fecha, total, estado, items }; las pantallas usan id_pedido.
 const aCompra = (c) => ({ id_pedido: c.idPedido, fecha: c.fecha, total: Number(c.total), estado: c.estado, items: c.items ?? [] })
 
 export async function registrarCliente(datos) {
   if (MODO_DEMO) return demo.registrar(datos)
-  const { nombre, apellido, email, password } = datos 
-  const { token, cliente } = await pedir('/auth/registro', conJson('POST', { nombre, apellido, email, password }))
-  guardarToken(token)
-  return cliente
+  const respuesta = await pedir('/api/usuarios/registro', conJson('POST', datos))
+  if (respuesta.token) guardarToken(respuesta.token)
+  return respuesta.cliente || respuesta;
 }
 
 export async function ingresarCliente(credenciales) {
@@ -35,7 +29,6 @@ export async function ingresarCliente(credenciales) {
 
   const usuario = await respuesta.json();
   
-  // 🔑 Guardamos el objeto completo del usuario en localStorage para persistencia en F5
   localStorage.setItem('cliente', JSON.stringify(usuario)); 
   return usuario; 
 }
@@ -44,7 +37,7 @@ export async function salirCliente() {
   if (MODO_DEMO) {
     demo.cerrarSesion();
   } else {
-    localStorage.removeItem('cliente'); // 👈 Limpiamos la sesión guardada
+    localStorage.removeItem('cliente'); 
     guardarToken(null);
   }
 }
@@ -52,7 +45,6 @@ export async function salirCliente() {
 export async function restaurarSesion() {
   if (MODO_DEMO) return demo.sesion()
   try {
-    // 🔑 Leemos directamente el usuario almacenado localmente al recargar la página (F5)
     const usuarioGuardado = localStorage.getItem('cliente');
     if (usuarioGuardado) {
       return JSON.parse(usuarioGuardado);

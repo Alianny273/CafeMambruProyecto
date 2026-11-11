@@ -1,4 +1,4 @@
-import { useAuth } from '../context/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 export default function PanelUsuarios() {
   const { cliente, salir } = useAuth();

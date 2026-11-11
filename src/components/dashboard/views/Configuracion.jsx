@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Sun, Moon, Bell, ChevronDown, User, Edit2, Mail, Phone, FileText, Calendar, MapPin, ShieldCheck, Coffee, Plus, X, Users } from 'lucide-react';
+import { Settings, Sun, Moon, Bell, ChevronDown, User, Edit2, Mail, Phone, FileText, Calendar, MapPin, ShieldCheck, Coffee, Plus, X, Users, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const API_URL = 'http://localhost:8080/api/usuarios';
@@ -17,6 +17,7 @@ export default function Configuracion() {
 
   const [modalType, setModalType] = useState(null);
 
+  // Estados del formulario idénticos a la BD
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +26,8 @@ export default function Configuracion() {
   const [tipoDocumento, setTipoDocumento] = useState('');
   const [numeroDocumento, setNumeroDocumento] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [idRol, setIdRol] = useState('1'); 
+  const [estado, setEstado] = useState(true); 
 
   useEffect(() => {
     if (isDarkMode) {
@@ -38,14 +41,8 @@ export default function Configuracion() {
 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
-  // --- FUNCIONES AUXILIARES DE SEGURIDAD (Mapean propiedades del Back y BD) ---
   const getUserId = (u) => u?.id_usuario || u?.idUsuario || u?.id;
-  
-  const getRolId = (u) => {
-    // Busca el rol en todas las estructuras posibles que Spring Boot u Hibernate puedan enviar
-    return u?.rol?.id_rol || u?.rol?.idRol || u?.id_rol || u?.idRol || u?.rolId;
-  };
-
+  const getRolId = (u) => u?.rol?.id_rol || u?.rol?.idRol || u?.id_rol || u?.idRol || u?.rolId;
   const getDocType = (u) => u?.tipo_documento || u?.tipoDocumento || 'Sin definir';
   const getDocNum = (u) => u?.numero_documento || u?.numeroDocumento || 'No registrado';
   
@@ -54,29 +51,20 @@ export default function Configuracion() {
     return f ? f.split('T')[0] : 'No registrada';
   };
 
-  // --- CARGA Y FILTRADO EXACTO DE ADMINISTRADORES ---
   const cargarDatos = async () => {
     setIsLoading(true);
     try {
       const response = await fetch(API_URL);
       if (response.ok) {
         const data = await response.json();
-        
-        console.log("Datos recibidos de Spring Boot:", data);
-
-        // FILTRO BLINDADO: Acepta rol 1 por cualquier vía o correos de admin conocidos
         const adminList = data.filter(u => {
           const rol = Number(getRolId(u));
-          const estado = Number(u.estado);
+          const est = Number(u.estado);
           const esAdminPorCorreo = u.email === 'admin@mambru.com' || u.email === 'juan@gmail.com';
-
-          // Si el estado es 1 (activo) Y (su rol es 1 O es un correo de admin conocido)
-          return (rol === 1 || esAdminPorCorreo) && estado === 1;
+          return (rol === 1 || esAdminPorCorreo) && est === 1;
         });
 
         setAdmins(adminList);
-
-        // Buscamos el usuario logueado
         const currentUser = adminList.find(u => Number(getUserId(u)) === ADMIN_ID) || adminList[0] || null;
         setLoggedAdmin(currentUser);
       }
@@ -89,15 +77,13 @@ export default function Configuracion() {
   };
   
   useEffect(() => {
-  const cargar = async () => {
-    await cargarDatos();
-  };
-  cargar();
-}, []);
+    cargarDatos();
+  }, []);
 
   const openCreateModal = () => {
     setNombre(''); setEmail(''); setPassword(''); setTelefono('');
     setDireccion(''); setTipoDocumento(''); setNumeroDocumento(''); setFechaNacimiento('');
+    setIdRol('1'); setEstado(true);
     setSelectedAdminId(null);
     setModalType('CREATE');
   };
@@ -112,6 +98,8 @@ export default function Configuracion() {
     setTipoDocumento(getDocType(adminData) !== 'Sin definir' ? getDocType(adminData) : ''); 
     setNumeroDocumento(getDocNum(adminData) !== 'No registrado' ? getDocNum(adminData) : ''); 
     setFechaNacimiento(getFecha(adminData) !== 'No registrada' ? getFecha(adminData) : '');
+    setIdRol(getRolId(adminData) || '1');
+    setEstado(Number(adminData.estado) === 1 || adminData.estado === true);
     setSelectedAdminId(getUserId(adminData));
     setModalType('EDIT');
   };
@@ -124,8 +112,9 @@ export default function Configuracion() {
       if (modalType === 'CREATE') {
         const nuevoAdmin = {
           nombre, email, password, telefono, direccion,
-          tipoDocumento, numeroDocumento, fechaNacimiento,
-          idRol: 1, estado: 1
+          tipoDocumento, numeroDocumento, 
+          fechaNacimiento: fechaNacimiento ? `${fechaNacimiento}T00:00:00` : null,
+          idRol: parseInt(idRol), estado: estado ? 1 : 0
         };
         
         const res = await fetch(`${API_URL}/registro`, { 
@@ -146,9 +135,10 @@ export default function Configuracion() {
       } else if (modalType === 'EDIT') {
         const adminActualizado = {
           nombre, email, telefono, direccion,
-          tipoDocumento, numeroDocumento, fechaNacimiento,
-          rol: { idRol: 1 }, 
-          estado: 1
+          tipoDocumento, numeroDocumento, 
+          fechaNacimiento: fechaNacimiento ? (fechaNacimiento.includes('T') ? fechaNacimiento : `${fechaNacimiento}T00:00:00`) : null,
+          idRol: parseInt(idRol), 
+          estado: estado ? 1 : 0
         };
         
         if (password.trim() !== '') adminActualizado.password = password;
@@ -173,9 +163,31 @@ export default function Configuracion() {
     }
   };
 
+  const handleInactivar = async (admin) => {
+    if (!window.confirm(`¿Estás seguro de inactivar al administrador ${admin.nombre}?`)) return;
+
+    try {
+      const adminInactivo = { ...admin, estado: 0 }; 
+      const res = await fetch(`${API_URL}/${getUserId(admin)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(adminInactivo)
+      });
+
+      if (res.ok) {
+        Swal.fire({ icon: 'success', title: 'Inactivado', text: 'Administrador retirado correctamente.', confirmButtonColor: '#2C5545', customClass: { popup: 'rounded-[20px]' } });
+        cargarDatos();
+      } else {
+        throw new Error('No se pudo procesar la solicitud en el servidor');
+      }
+    } catch (error) {
+      console.error('Error al inactivar:', error);
+      Swal.fire('Error', 'No se pudo inactivar al administrador.', 'error');
+    }
+  };
+
   return (
     <div className="w-full h-full p-4 md:p-6 lg:p-8">
-      {/* --- ENCABEZADO GLOBAL --- */}
       <div className="dashboard-header mb-8">
         <div className="header-title">
           <h2>Configuración</h2>
@@ -183,8 +195,15 @@ export default function Configuracion() {
         </div>
 
         <div className="flex items-center gap-4 flex-wrap">
-          <button onClick={openCreateModal} className="btn-secondary !bg-[var(--secondary)] !text-white !border-transparent !flex !items-center !gap-2 !py-2.5 !px-5 hover:!bg-[#1E3B30]">
-            <Plus size={16} strokeWidth={2.5} /> Nuevo Admin
+          <button 
+            onClick={openCreateModal}
+            style={{
+              backgroundColor: 'var(--secondary)', color: 'white', padding: '10px 20px', 
+              borderRadius: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', 
+              gap: '8px', cursor: 'pointer', border: 'none'
+            }}
+          >
+            <Plus size={20} strokeWidth={2.5} /> Nuevo Admin
           </button>
 
           <div className="filter-tabs">
@@ -204,14 +223,9 @@ export default function Configuracion() {
         </div>
       ) : (
         <>
-          {/* ====================================================
-              PARTE SUPERIOR: MI PERFIL (2/3) Y PREFERENCIAS (1/3)
-          ==================================================== */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-10 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
             
-            {/* --- COLUMNA IZQUIERDA: TARJETA PRINCIPAL DEL PERFIL --- */}
             <div className="card !p-0 overflow-hidden lg:col-span-2">
-              
               <div className="relative bg-[var(--secondary)] h-36 md:h-44 w-full shrink-0">
                 <div className="absolute top-6 left-6 md:top-8 md:left-8 text-white/90 text-[10px] font-bold tracking-[0.25em] uppercase">Café · Chocolate · Experiencias</div>
                 <svg className="absolute -bottom-1 w-full h-12 md:h-16 fill-white" preserveAspectRatio="none" viewBox="0 0 1440 60">
@@ -236,8 +250,19 @@ export default function Configuracion() {
                 </div>
                 
                 <div className="pb-1.5 mt-2 sm:mt-0">
-                  <button onClick={() => openEditModal(loggedAdmin)} className="btn-secondary w-full sm:w-auto !flex !items-center !justify-center !gap-2 !py-2 md:!py-2.5">
-                    <Edit2 size={14} className="md:w-4 md:h-4" /> Editar perfil
+                  <button 
+                    onClick={() => openEditModal(loggedAdmin)} 
+                    style={{
+                      backgroundColor: 'transparent', color: 'var(--text-dark)', 
+                      padding: '8px 16px', borderRadius: '50px', fontWeight: '800', 
+                      border: '2px solid var(--text-dark)', cursor: 'pointer', 
+                      display: 'flex', alignItems: 'center', gap: '6px', 
+                      textTransform: 'uppercase', fontSize: '0.75rem', 
+                      boxShadow: '4px 4px 0px var(--secondary)', transition: 'all 0.2s ease', 
+                      letterSpacing: '0.5px', marginRight: '1.5rem'
+                    }}
+                  >
+                    <Edit2 size={14} strokeWidth={2.5} /> Editar perfil
                   </button>
                 </div>
               </div>
@@ -301,7 +326,6 @@ export default function Configuracion() {
               </div>
             </div>
 
-            {/* --- COLUMNA DERECHA: TARJETAS LATERALES --- */}
             <div className="flex flex-col gap-6 lg:gap-8 h-full">
               
               <div className="card h-full justify-center" style={{ padding: '24px' }}>
@@ -359,17 +383,13 @@ export default function Configuracion() {
             </div>
           </div>
 
-          {/* ====================================================
-              PARTE INFERIOR: TABLA DE TODOS LOS ADMINISTRADORES
-          ==================================================== */}
-          <div className="card !p-0 overflow-hidden mb-10 w-full mt-14">
+          <div className="card !p-0 overflow-hidden w-full dashboard-section-gap" style={{ marginTop: '40px' }}>
             <div className="p-6 border-b border-[var(--border-light)] flex justify-between items-center bg-[#FAFAF8]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white border border-[var(--border-light)] flex items-center justify-center text-[var(--secondary)] shadow-sm">
                   <Users size={18} strokeWidth={2} />
                 </div>
                 <div>
-                  
                   <h3 className="card-title text-lg">Administradores del Sistema</h3>
                   <p className="text-[10px] md:text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-0.5">Gestión de accesos y roles</p>
                 </div>
@@ -383,8 +403,8 @@ export default function Configuracion() {
                     <th className="px-6 py-4 font-bold">Usuario</th>
                     <th className="px-6 py-4 font-bold">Contacto</th>
                     <th className="px-6 py-4 font-bold">Documento</th>
-                    <th className="px-6 py-4 font-bold">Estado</th>
-                    <th className="px-6 py-4 font-bold text-right">Acciones</th>
+                    <th className="px-6 py-4 font-bold text-center">Estado</th>
+                    <th className="px-6 py-4 font-bold text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-light)]">
@@ -411,22 +431,24 @@ export default function Configuracion() {
                           <p className="text-sm font-semibold text-[var(--text-main)] truncate">{getDocNum(admin)}</p>
                           <p className="text-xs text-[var(--text-muted)] truncate">{getDocType(admin)}</p>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span className="badge available">Activo</span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <button 
-                            onClick={() => openEditModal(admin)} 
-                            className="btn-icon inline-flex bg-white border border-[var(--border-light)] w-8 h-8 rounded-full items-center justify-center hover:bg-[var(--secondary)] hover:text-white transition-colors shadow-sm"
-                            title="Editar usuario"
-                          >
-                            <Edit2 size={14} strokeWidth={2.5} />
-                          </button>
+                        <td className="px-6 py-4">
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                            <button onClick={() => openEditModal(admin)} className="btn-icon" title="Editar usuario">
+                              <Edit2 size={18} strokeWidth={2.5} />
+                            </button>
+                            {currentId !== ADMIN_ID && (
+                              <button onClick={() => handleInactivar(admin)} className="btn-icon" title="Inactivar usuario" style={{ color: '#E2725B' }}>
+                                <Trash2 size={18} strokeWidth={2.5} />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
                   })}
-                  
                   {admins.length === 0 && (
                     <tr>
                       <td colSpan="5" className="px-6 py-8 text-center text-[var(--text-muted)] font-medium">
@@ -441,93 +463,151 @@ export default function Configuracion() {
         </>
       )}
 
-      {/* ====================================================
-          MODAL DE FORMULARIO (Crea o Edita el ID seleccionado)
-      ==================================================== */}
       {modalType && (
-        <div className="fixed inset-0 bg-[#2C221E]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6" style={{ margin: 0 }}>
-          <div className="card !p-0 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl opacity-100 transform-none">
-
-            <div className="px-6 py-5 border-b border-[var(--border-light)] bg-[#FAFAF8] flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="card-title text-lg md:text-xl">
-                  {modalType === 'CREATE' ? 'Registrar nuevo administrador' : 'Editar administrador'}
-                </h3>
-              </div>
-              <button onClick={closeModal} className="btn-icon bg-white border border-[var(--border-light)] w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200">
-                <X size={16} strokeWidth={2.5} />
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            background: 'var(--card-bg, #fff)', padding: '2.5rem', borderRadius: '24px',
+            width: '100%', maxWidth: '600px', border: '2px solid var(--text-dark)', boxShadow: '8px 8px 0px var(--primary)',
+            maxHeight: '90vh', overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '800' }}>
+                {modalType === 'CREATE' ? 'Registrar Administrador' : 'Editar Administrador'}
+              </h3>
+              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={24} />
               </button>
             </div>
 
-            <div className="overflow-y-auto px-6 py-6 grow">
-              <form id="admin-form" onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
-                
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Nombre completo *</label>
-                  <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }} autoComplete="off">
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Nombre Completo *</label>
+                  <input 
+                    type="text" required maxLength="100" value={nombre} onChange={(e) => setNombre(e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ''))}
+                    placeholder="Ej. Estefany Prieto" autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
                 </div>
-
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Correo electrónico *</label>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Correo Electrónico *</label>
+                  <input 
+                    type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@mambru.com" autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
                 </div>
+              </div>
 
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Tipo de documento</label>
-                  <select value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value)} className="form-input !py-2 md:!py-2.5">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Tipo de Documento *</label>
+                  <select 
+                    required value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value)}
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box', background: '#fff', fontFamily: 'inherit' }}
+                  >
                     <option value="">Seleccionar...</option>
-                    <option value="CC">Cédula de Ciudadanía</option>
-                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="CC">C.C.</option>
+                    <option value="CE">C.E.</option>
                     <option value="NIT">NIT</option>
+                    <option value="PAS">Pasaporte</option>
                   </select>
                 </div>
-
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Número de documento</label>
-                  <input type="text" value={numeroDocumento} onChange={(e) => setNumeroDocumento(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Número de Documento *</label>
+                  <input 
+                    type="text" required maxLength="15" value={numeroDocumento} onChange={(e) => setNumeroDocumento(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Ej. 1020304050" autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
                 </div>
+              </div>
 
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Teléfono / celular</label>
-                  <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Teléfono / Celular *</label>
+                  <input 
+                    type="tel" required maxLength="10" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Ej. 3001234567" autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
                 </div>
-
-                <div className="form-group !mb-0">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Fecha de nacimiento</label>
-                  <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Fecha de Nacimiento</label>
+                  <input 
+                    type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)}
+                    autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  />
                 </div>
+              </div>
 
-                <div className="form-group !mb-0 sm:col-span-2">
-                  <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px]">Dirección de residencia</label>
-                  <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} className="form-input !py-2 md:!py-2.5" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Dirección de Residencia</label>
+                  <input 
+                    type="text" maxLength="150" value={direccion} onChange={(e) => setDireccion(e.target.value)}
+                    placeholder="Ej. Calle 123 #45-67" autoComplete="off"
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
                 </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Rol del Sistema *</label>
+                  <select 
+                    required value={idRol} onChange={(e) => setIdRol(e.target.value)}
+                    style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box', background: '#fff', fontFamily: 'inherit' }}
+                  >
+                    <option value="1">Administrador</option>
+                    <option value="2">Cliente</option>
+                  </select>
+                </div>
+              </div>
 
-                <div className="sm:col-span-2 bg-[#FFF8EB]/50 p-4 rounded-xl border border-[var(--accent)]/30 mt-2">
-                  <div className="form-group !mb-0 sm:max-w-sm">
-                    <label className="form-label uppercase tracking-wider !text-[9px] md:!text-[10px] !text-[var(--accent)]">
-                      {modalType === 'CREATE' ? 'Contraseña asignada *' : 'Nueva contraseña (opcional)'}
-                    </label>
-                    <input
-                      type="password" required={modalType === 'CREATE'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)}
-                      className="form-input !py-2 md:!py-2.5 !border-[var(--accent)]/30 focus:!border-[var(--accent)]"
-                    />
-                    {modalType === 'EDIT' && (
-                      <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1.5">Déjalo en blanco para mantener la actual.</p>
-                    )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ padding: '0.8rem', background: '#fef3c7', borderRadius: '12px', border: '1px solid #fcd34d' }}>
+                  <label style={{ display: 'block', fontWeight: '800', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase', color: '#d97706' }}>
+                    {modalType === 'CREATE' ? 'Contraseña Asignada *' : 'Nueva Contraseña (Opcional)'}
+                  </label>
+                  <input
+                    type="password" required={modalType === 'CREATE'} minLength="6" value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••" autoComplete="new-password"
+                    style={{ width: '100%', padding: '10px', border: '2px solid #d97706', borderRadius: '10px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                {modalType === 'EDIT' && (
+                  <div>
+                    <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem', fontSize: '0.85rem', textTransform: 'uppercase' }}>Estado</label>
+                    <select 
+                      value={estado} onChange={(e) => setEstado(e.target.value === 'true')}
+                      style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', background: '#fff', fontFamily: 'inherit' }}
+                    >
+                      <option value="true">Activo</option>
+                      <option value="false">Inactivo</option>
+                    </select>
                   </div>
-                </div>
+                )}
+              </div>
 
-              </form>
-            </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" onClick={closeModal} style={{
+                  backgroundColor: 'transparent', color: 'var(--text-dark)', padding: '12px 30px',
+                  borderRadius: '50px', fontWeight: '800', border: '2px solid var(--text-dark)', cursor: 'pointer'
+                }}>
+                  CANCELAR
+                </button>
+                <button type="submit" style={{
+                  backgroundColor: 'var(--secondary)', color: 'white', padding: '12px 30px',
+                  borderRadius: '12px', fontWeight: '800', border: '2px solid var(--text-dark)', cursor: 'pointer'
+                }}>
+                  {modalType === 'CREATE' ? 'Registrar Admin' : 'Guardar Cambios'}
+                </button>
+              </div>
 
-            <div className="px-6 py-4 border-t border-[var(--border-light)] bg-[#FAFAF8] flex flex-col-reverse sm:flex-row sm:justify-end gap-3 shrink-0">
-              <button type="button" onClick={closeModal} className="btn-secondary !py-2">
-                Cancelar
-              </button>
-              <button type="submit" form="admin-form" className="btn-save !mt-0 !py-2 !px-6">
-                {modalType === 'CREATE' ? 'Registrar Admin' : 'Guardar Cambios'}
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

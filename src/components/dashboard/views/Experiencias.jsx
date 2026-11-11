@@ -287,7 +287,7 @@ export default function Experiencias() {
         )}
       </div>
 
-      {/* --- MODAL PARA CREAR / EDITAR EXPERIENCIA --- */}
+     {/* --- MODAL PARA CREAR / EDITAR EXPERIENCIA --- */}
       {isModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
@@ -305,11 +305,12 @@ export default function Experiencias() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Nombre de la Experiencia</label>
                 <input 
                   type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Ej. Cata de Café" autoComplete="off"
                   style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                 />
               </div>
@@ -318,6 +319,7 @@ export default function Experiencias() {
                 <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Subtítulo (ej. Descubrimiento Sensorial)</label>
                 <input 
                   type="text" value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)}
+                  placeholder="Ej. Descubrimiento Sensorial" autoComplete="off"
                   style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                 />
               </div>
@@ -326,6 +328,7 @@ export default function Experiencias() {
                 <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Categoría (ej. Sensorial, Especial)</label>
                 <input 
                   type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)}
+                  placeholder="Ej. Sensorial, Especial" autoComplete="off"
                   style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                 />
               </div>
@@ -334,6 +337,7 @@ export default function Experiencias() {
                 <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>URL de la Imagen</label>
                 <input 
                   type="text" placeholder="https://..." value={imagen} onChange={(e) => setImagen(e.target.value)}
+                  autoComplete="off"
                   style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                 />
               </div>
@@ -342,6 +346,7 @@ export default function Experiencias() {
                 <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Descripción</label>
                 <textarea 
                   value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows="3"
+                  placeholder="Escribe una breve descripción..." autoComplete="off"
                   style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                 />
               </div>
@@ -351,6 +356,7 @@ export default function Experiencias() {
                   <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Precio ($)</label>
                   <input 
                     type="number" step="0.01" required value={precio} onChange={(e) => setPrecio(e.target.value)}
+                    placeholder="0.00" autoComplete="off"
                     style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -358,6 +364,7 @@ export default function Experiencias() {
                   <label style={{ display: 'block', fontWeight: '700', marginBottom: '0.3rem' }}>Cupos Disponibles</label>
                   <input 
                     type="number" min="0" required value={cuposDisponibles} onChange={(e) => setCuposDisponibles(e.target.value)}
+                    placeholder="0" autoComplete="off"
                     style={{ width: '100%', padding: '10px', border: '2px solid var(--text-dark)', borderRadius: '10px', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -374,13 +381,13 @@ export default function Experiencias() {
                 </select>
               </div>
 
-              <button type="button" onClick={handleSubmit} style={{
+              <button type="submit" style={{
                 marginTop: '1rem', backgroundColor: 'var(--secondary)', color: 'white', padding: '12px',
                 borderRadius: '12px', fontWeight: '700', border: '2px solid var(--text-dark)', cursor: 'pointer'
               }}>
                 {isEditMode ? 'Actualizar Experiencia' : 'Guardar Experiencia'}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

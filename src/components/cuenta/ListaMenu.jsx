@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { gruposMenu } from '../../data/menuCuenta'
-import { useAuth } from '../../context/useAuth'
-import { useToast } from '../../context/useToast'
+import { useAuth } from '../../hooks/useAuth'
+import { useToast } from '../../hooks/useToast'
 
 // Lista del menú del cliente (desplegable del encabezado y lateral de "Mi cuenta")
 export default function ListaMenu({ onNavegar }) {
